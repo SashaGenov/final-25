@@ -46,7 +46,9 @@ func nextDateHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	w.Write([]byte(nextDate))
+	if _, err := w.Write([]byte(nextDate)); err != nil {
+		log.Printf("Error writing: %v\n", err)
+	}
 }
 
 func addTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -105,7 +107,7 @@ func addTaskHandler(w http.ResponseWriter, r *http.Request) {
 				}
 
 				// Если правило повторения - "d 1" и сегодняшняя дата допустима, устанавливаем её
-				
+
 				if task.Repeat == "d 1" && nextDate == today {
 					task.Date = today
 				} else {
@@ -183,7 +185,6 @@ func getTasksHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer rows.Close()
-
 
 		for rows.Next() {
 			var task TaskWithID
@@ -423,7 +424,7 @@ func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Возвращаем пустой JSON-ответ в случае успешного удаления
-	
+
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.Write([]byte("{}"))
 }
